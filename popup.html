@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Date Search</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+
+  <main class="container">
+
+    <h1>YouTube Search</h1>
+
+    <label for="query">Search</label>
+
+    <input
+      id="query"
+      type="text"
+      placeholder="e.g. Memes"
+      autofocus
+    >
+
+    <div class="date-row">
+
+      <div>
+        <label for="from">From</label>
+        <input id="from" type="date">
+      </div>
+
+      <div>
+        <label for="to">To</label>
+        <input id="to" type="date">
+      </div>
+
+    </div>
+
+    <label class="checkbox-row">
+      <input id="newTab" type="checkbox">
+      Open search in a new tab
+    </label>
+
+    <label class="checkbox-row">
+      <input id="excludeShorts" type="checkbox">
+      Exclude Shorts
+    </label>
+
+    <button id="search">
+      Search YouTube
+    </button>
+
+    <p id="error"></p>
+
+  </main>
+
+  <script src="popup.js"></script>
+
+</body>
+</html>
