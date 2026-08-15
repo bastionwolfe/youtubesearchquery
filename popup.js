@@ -3,88 +3,130 @@ const browserAPI = globalThis.browser ?? globalThis.chrome;
 const queryInput = document.getElementById("query");
 const fromInput = document.getElementById("from");
 const toInput = document.getElementById("to");
+const dateRangeInput = document.getElementById("dateRange");
 const newTabInput = document.getElementById("newTab");
 const excludeShortsInput = document.getElementById("excludeShorts");
 const searchButton = document.getElementById("search");
 const error = document.getElementById("error");
 
-searchButton.addEventListener("click", async () => {
-  const query = queryInput.value.trim();
-  const from = fromInput.value;
-  const to = toInput.value;
-  const openNewTab = newTabInput.checked;
-  const excludeShorts = excludeShortsInput.checked;
+function getLocalDate() {
+    const today = new Date();
 
-  error.textContent = "";
+    return new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+    );
+}
 
-  if (!query) {
-    error.textContent = "Enter something to search.";
-    return;
-  }
+function formatDate(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
 
-  if (!from || !to) {
-    error.textContent = "Choose both dates.";
-    return;
-  }
 
-  if (from > to) {
-    error.textContent = "The 'From' date must be before the 'To' date.";
-    return;
-  }
+dateRangeInput.addEventListener("change", () => {
+    const range = dateRangeInput.value;
+    const today = getLocalDate();
 
-  // Build the YouTube search query
-  const searchQuery =
-    `${query} after:${from} before:${to}`;
+    let fromDate = new Date(today);
+    const toDate = new Date(today);
 
-  // Create YouTube search URL
-  const url = new URL("https://www.youtube.com/results");
+    switch (range) {
+        case "today":
+            fromDate = new Date(today);
+            break;
 
-  url.searchParams.set("search_query", searchQuery);
+        case "7days":
+            fromDate.setDate(fromDate.getDate() - 6);
+            break;
 
-  // YouTube's "Videos" result-type filter.
-  // IMPORTANT: Do not include the extra %25 encoding.
-  if (excludeShorts) {
-    url.searchParams.set("sp", "EgIQAQ%3D%3D");
-  }
+        case "30days":
+            fromDate.setDate(fromDate.getDate() - 29);
+            break;
 
-  const searchUrl = url.toString();
+        case "6months":
+            fromDate.setMonth(fromDate.getMonth() - 6);
+            break;
 
-  try {
-    if (openNewTab) {
+        case "year":
+            fromDate = new Date(today.getFullYear(), 0, 1);
+            break;
 
-      // Open search in a new tab
-      await browserAPI.tabs.create({
-        url: searchUrl
-      });
-
-    } else {
-
-      // Replace the currently active tab
-      const tabs = await browserAPI.tabs.query({
-        active: true,
-        currentWindow: true
-      });
-
-      if (tabs.length === 0) {
-        return;
-      }
-
-      await browserAPI.tabs.update(tabs[0].id, {
-        url: searchUrl
-      });
+        case "custom":
+            return;
     }
 
-  } catch (err) {
+    fromInput.value = formatDate(fromDate);
+    toInput.value = formatDate(toDate);
+});
 
-    console.error("Could not open YouTube:", err);
+searchButton.addEventListener("click", async () => {
+    const query = queryInput.value.trim();
 
-    error.textContent = "Could not open YouTube.";
+    // Default dates
+    const defaultFrom = "2005-06-28";
 
-  }
+    const today = getLocalDate();
+    const defaultTo = formatDate(today);
+
+    const from = fromInput.value || defaultFrom;
+    const to = toInput.value || defaultTo;
+
+    const openNewTab = newTabInput.checked;
+    const excludeShorts = excludeShortsInput.checked;
+
+    error.textContent = "";
+
+    if (!query) {
+        error.textContent = "Enter something to search.";
+        return;
+    }
+
+    if (from > to) {
+        error.textContent = "The 'From' date must be before the 'To' date.";
+        return;
+    }
+
+    const searchQuery =
+        `${query} after:${from} before:${to}`;
+
+    const url = new URL("https://www.youtube.com/results");
+
+    url.searchParams.set("search_query", searchQuery);
+
+    if (excludeShorts) {
+        url.searchParams.set("sp", "EgIQAQ%3D%3D");
+    }
+
+    const searchUrl = url.toString();
+
+    try {
+        if (openNewTab) {
+            await browserAPI.tabs.create({
+                url: searchUrl
+            });
+        } else {
+            const tabs = await browserAPI.tabs.query({
+                active: true,
+                currentWindow: true
+            });
+
+            if (tabs.length === 0) {
+                return;
+            }
+
+            await browserAPI.tabs.update(tabs[0].id, {
+                url: searchUrl
+            });
+        }
+    } catch (err) {
+        console.error("Could not open YouTube:", err);
+        error.textContent = "Could not open YouTube.";
+    }
 });
 
 queryInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    searchButton.click();
-  }
+    if (event.key === "Enter") {
+        searchButton.click();
+    }
 });
