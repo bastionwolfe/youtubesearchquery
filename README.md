@@ -47,6 +47,20 @@ The extension turns that into a YouTube search using:
 Memes after:2016-08-01 before:2026-08-10
 ```
 
+You can also use the quick date presets to automatically generate the date range.
+
+For example, selecting:
+
+Last 7 Days
+
+automatically sets the range from six days before the current date through the current date, meaning the current day is included.
+
+The Custom option allows you to manually choose the start and end dates.
+
+If no dates are entered, the extension defaults to:
+
+June 28, 2005 → Current Date
+
 YouTube then performs the search normally.
 
 The extension does not download, parse, or analyze YouTube's search results.
@@ -86,18 +100,6 @@ Expand the search options with things like:
 * Channels
 * Video duration
 
-### Quick Date Presets
-
-Add one-click options such as:
-
-```text
-Today
-Last 7 Days
-Last 30 Days
-Last 6 Months
-This Year
-Custom
-```
 
 ### Saved Searches
 
